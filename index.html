@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Parking Lot Management</title>
+    <style>
+      :root {
+        /* Light theme variables */
+        --primary-color: #4361ee;
+        --success-color: #2ec4b6;
+        --danger-color: #e63946;
+        --text-primary: #2d3748;
+        --text-secondary: #4a5568;
+        --bg-color: #e2e8f0;
+        --card-bg: #ffffff;
+        --hover-bg: #f0f2f7;
+        --section-bg: #edf2f7;
+        --border-color: #e2e8f0;
+        --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+        --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07),
+          0 2px 4px rgba(0, 0, 0, 0.06);
+        --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1),
+          0 4px 6px rgba(0, 0, 0, 0.08);
+        --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.12),
+          0 10px 10px rgba(0, 0, 0, 0.09);
+      }
+
+      /* Dark theme variables */
+      [data-theme="dark"] {
+        --primary-color: #4361ee;
+        --success-color: #2ec4b6;
+        --danger-color: #e63946;
+        --text-primary: #ffffff;
+        --text-secondary: #cbd5e0;
+        --bg-color: #1a202c;
+        --card-bg: #2d3748;
+        --hover-bg: #2d3748;
+        --section-bg: #2d3748;
+        --border-color: #4a5568;
+      }
+
+      /* Theme toggle button styles */
+      .theme-toggle {
+        position: fixed;
+        top: 20px;
+        right: 40px;
+        padding: 10px;
+        border-radius: 50%;
+        width: 45px;
+        height: 45px;
+        background: var(--card-bg);
+        border: 2px solid var(--border-color);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        box-shadow: var(--shadow-md);
+        transition: all 0.3s ease;
+        z-index: 1000;
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+      }
+
+      .theme-toggle:hover {
+        transform: scale(1.1);
+        box-shadow: var(--shadow-lg);
+        border-color: var(--primary-color);
+      }
+
+      body {
+        font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          Roboto, sans-serif;
+        text-align: center;
+        background: linear-gradient(135deg, var(--bg-color) 0%, #e8ecf3 100%);
+        margin: 0;
+        padding: 30px;
+        color: var(--text-primary);
+        line-height: 1.6;
+      }
+
+      .container {
+        max-width: 1100px;
+        margin: 0 auto;
+        background: var(--card-bg);
+        padding: 40px;
+        border-radius: 20px;
+        box-shadow: var(--shadow-xl);
+        border: 1px solid rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(20px);
+      }
+
+      h2 {
+        color: var(--text-primary);
+        margin-bottom: 40px;
+        font-size: 2.5em;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+      }
+
+      .dashboard-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 25px;
+        margin-bottom: 40px;
+      }
+
+      .stat-card {
+        background: var(--section-bg);
+        padding: 25px;
+        border-radius: 16px;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-color);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-lg);
+        border-color: var(--primary-color);
+      }
+
+      .stat-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--primary-color);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+
+      .stat-card:hover::before {
+        opacity: 1;
+      }
+
+      .stat-card h3 {
+        font-size: 0.9em;
+        color: var(--text-secondary);
+        margin: 0 0 10px 0;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      .stat-card .value {
+        font-size: 2em;
+        font-weight: 700;
+        color: var(--primary-color);
+      }
+
+      .input-group {
+        background: var(--section-bg);
+        padding: 35px;
+        border-radius: 20px;
+        box-shadow: var(--shadow-md);
+        border: 1px solid var(--border-color);
+        transition: all 0.3s ease;
+      }
+
+      .input-group:hover {
+        box-shadow: var(--shadow-lg);
+      }
+
+      input {
+        padding: 14px 20px;
+        margin: 10px;
+        border-radius: 12px;
+        border: 2px solid var(--border-color);
+        font-size: 16px;
+        transition: all 0.3s ease;
+        width: 280px;
+        background: var(--card-bg);
+      }
+
+      input:hover {
+        border-color: #cbd5e0;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+      }
+
+      button {
+        padding: 14px 28px;
+        margin: 10px;
+        border-radius: 12px;
+        border: none;
+        font-size: 15px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+      }
+
+      button::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.1);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+
+      button:hover::after {
+        opacity: 1;
+      }
+
+      button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+      }
+
+      .btn-arrival {
+        background-color: var(--primary-color);
+        color: white;
+      }
+
+      .btn-park {
+        background-color: var(--success-color);
+        color: white;
+      }
+
+      .btn-remove {
+        background-color: var(--danger-color);
+        color: white;
+      }
+
+      .time-display {
+        display: none;
+        background: var(--section-bg);
+        padding: 20px;
+        margin: 20px auto;
+        border-radius: 16px;
+        border: 1px solid var(--border-color);
+        max-width: 320px;
+        font-size: 16px;
+        color: var(--text-primary);
+        font-weight: 500;
+        box-shadow: var(--shadow-md);
+        transition: all 0.3s ease;
+      }
+
+      .time-display:hover {
+        box-shadow: var(--shadow-lg);
+        border-color: var(--primary-color);
+      }
+
+      table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        margin-top: 30px;
+        background: var(--card-bg);
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border-color);
+      }
+
+      th {
+        background-color: var(--section-bg);
+        color: var(--text-primary);
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 13px;
+        letter-spacing: 0.5px;
+        padding: 20px 16px;
+        border-bottom: 2px solid var(--border-color);
+        position: relative;
+      }
+
+      th::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: var(--primary-color);
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
+      }
+
+      th:hover::after {
+        transform: scaleX(1);
+      }
+
+      td {
+        padding: 18px 16px;
+        border-bottom: 1px solid var(--border-color);
+        color: var(--text-secondary);
+        transition: all 0.3s ease;
+      }
+
+      tr:hover td {
+        background-color: var(--section-bg);
+      }
+
+      .remove-btn {
+        padding: 8px 16px;
+        font-size: 13px;
+        border-radius: 8px;
+        background-color: var(--danger-color);
+        color: white;
+        transition: all 0.3s ease;
+      }
+
+      .remove-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(230, 57, 70, 0.3);
+      }
+
+      .parking-status {
+        background: var(--section-bg);
+        padding: 20px;
+        border-radius: 16px;
+        margin: 30px 0;
+        border: 1px solid var(--border-color);
+        transition: all 0.3s ease;
+        box-shadow: var(--shadow-md);
+      }
+
+      .parking-status:hover {
+        box-shadow: var(--shadow-lg);
+        border-color: var(--primary-color);
+      }
+
+      @keyframes slideDown {
+        from {
+          opacity: 0;
+          transform: translateY(-20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+
+      .vehicle-type-select {
+        padding: 14px 20px;
+        margin: 10px;
+        border-radius: 12px;
+        border: 2px solid var(--border-color);
+        font-size: 16px;
+        transition: all 0.3s ease;
+        background: var(--card-bg);
+        color: var(--text-primary);
+        cursor: pointer;
+      }
+
+      .vehicle-type-select:hover {
+        border-color: #cbd5e0;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+      }
+
+      /* Add styles for the receipt */
+      .receipt {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: var(--card-bg);
+        padding: 30px;
+        border-radius: 16px;
+        box-shadow: var(--shadow-xl);
+        border: 1px solid var(--border-color);
+        z-index: 2000;
+        min-width: 300px;
+        animation: fadeIn 0.3s ease;
+      }
+
+      .receipt.show {
+        display: block;
+      }
+
+      .receipt-header {
+        text-align: center;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px dashed var(--border-color);
+      }
+
+      .receipt-content {
+        margin: 20px 0;
+      }
+
+      .receipt-row {
+        display: flex;
+        justify-content: space-between;
+        margin: 10px 0;
+        color: var(--text-primary);
+      }
+
+      .receipt-footer {
+        text-align: center;
+        margin-top: 20px;
+        padding-top: 15px;
+        border-top: 2px dashed var(--border-color);
+        font-size: 0.9em;
+        color: var(--text-secondary);
+      }
+
+      .close-receipt {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: none;
+        border: none;
+        font-size: 20px;
+        cursor: pointer;
+        color: var(--text-primary);
+        padding: 5px;
+      }
+
+      .print-button {
+        background: var(--primary-color);
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        margin-top: 15px;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translate(-50%, -40%);
+        }
+        to {
+          opacity: 1;
+          transform: translate(-50%, -50%);
+        }
+      }
+
+      /* Add overlay style */
+      .overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(5px);
+        z-index: 1999;
+      }
+
+      .overlay.show {
+        display: block;
+      }
+
+      /* Add styles for admin panel */
+      .admin-button {
+        position: fixed;
+        bottom: 20px;
+        right: 40px;
+        padding: 12px 24px;
+        background: var(--card-bg);
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        cursor: pointer;
+        font-size: 16px;
+        color: var(--text-primary);
+        z-index: 1000;
+      }
+
+      .admin-panel {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: var(--card-bg);
+        padding: 30px;
+        border-radius: 16px;
+        box-shadow: var(--shadow-xl);
+        border: 1px solid var(--border-color);
+        z-index: 2000;
+        min-width: 350px;
+        animation: fadeIn 0.3s ease;
+      }
+
+      .admin-panel.show {
+        display: block;
+      }
+
+      .admin-panel h3 {
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid var(--border-color);
+      }
+
+      .rate-input {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 15px 0;
+      }
+
+      .rate-input label {
+        color: var(--text-primary);
+        font-weight: 500;
+      }
+
+      .rate-input input {
+        width: 100px;
+        text-align: center;
+      }
+
+      .save-settings {
+        background: var(--primary-color);
+        color: white;
+        width: 100%;
+        margin-top: 20px;
+      }
+
+      /* Update print styles */
+      @media print {
+        @page {
+          margin: 0.5cm;
+        }
+
+        body * {
+          visibility: hidden;
+        }
+
+        .receipt.show {
+          visibility: visible;
+          position: absolute;
+          left: 50%;
+          top: 0;
+          transform: translateX(-50%);
+          width: 300px;
+          padding: 20px;
+          background: white !important;
+          color: black !important;
+          font-family: "Courier New", monospace;
+          box-shadow: none;
+          border: none;
+        }
+
+        .receipt.show * {
+          visibility: visible;
+          color: black !important;
+        }
+
+        .receipt-header {
+          text-align: center;
+          margin-bottom: 20px;
+          padding-bottom: 10px;
+          border-bottom: 1px dashed black;
+        }
+
+        .receipt-header h3 {
+          margin: 0;
+          padding: 0;
+          font-size: 16px;
+        }
+
+        .receipt-content {
+          margin: 15px 0;
+        }
+
+        .receipt-row {
+          display: flex;
+          justify-content: space-between;
+          margin: 8px 0;
+          font-size: 12px;
+          page-break-inside: avoid;
+        }
+
+        .receipt-row span:first-child {
+          padding-right: 15px;
+        }
+
+        .receipt-row span:last-child {
+          text-align: right;
+        }
+
+        .receipt-footer {
+          text-align: center;
+          margin-top: 20px;
+          padding-top: 10px;
+          border-top: 1px dashed black;
+          font-size: 12px;
+        }
+
+        /* Hide buttons when printing */
+        .close-receipt,
+        .print-button,
+        .overlay {
+          display: none !important;
+        }
+
+        /* Ensure no page breaks within receipt */
+        .receipt {
+          page-break-inside: avoid;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <button class="theme-toggle" onclick="toggleTheme()" id="themeToggle">
+      🌞
+    </button>
+
+    <div class="container">
+      <h2>🅿️ Parking Management Dashboard</h2>
+
+      <div class="dashboard-stats">
+        <div class="stat-card">
+          <h3>Total Spots</h3>
+          <div class="value">5</div>
+        </div>
+        <div class="stat-card">
+          <h3>Occupied Spots</h3>
+          <div class="value" id="occupied-spots">0</div>
+        </div>
+        <div class="stat-card">
+          <h3>Available Spots</h3>
+          <div class="value" id="available-spots">5</div>
+        </div>
+      </div>
+
+      <div class="input-group">
+        <input
+          type="text"
+          id="vehicleNumber"
+          placeholder="Enter Vehicle Number"
+          oninput="handleVehicleNumberInput()"
+        />
+        <select id="vehicleType" class="vehicle-type-select">
+          <option value="twoWheeler">Two Wheeler </option>
+          <option value="fourWheeler">Four Wheeler </option>
+        </select>
+        <button class="btn-park" onclick="parkVehicle()">
+          <i class="fas fa-parking"></i> Park Vehicle
+        </button>
+        <button class="btn-remove" id="removeButton" style="display: none;" onclick="removeVehicle()">
+          <i class="fas fa-sign-out-alt"></i> Remove Vehicle
+        </button>
+      </div>
+
+      <div class="parking-status" id="status"></div>
+      <table>
+        <thead>
+          <tr>
+            <th>Vehicle Number</th>
+            <th>Vehicle Type</th>
+            <th>Spot Number</th>
+            <th>Arrival Time</th>
+            <th>Departure Time</th>
+            <th>Fare (₹)</th>
+            <th id="actionHeader" style="display: none">Action</th>
+          </tr>
+        </thead>
+        <tbody id="parkingTable"></tbody>
+      </table>
+    </div>
+
+    <div class="overlay" id="overlay"></div>
+    <div class="receipt" id="receipt">
+      <button class="close-receipt" onclick="closeReceipt()">×</button>
+      <div class="receipt-header">
+        <h3>🅿️ Parking Receipt</h3>
+      </div>
+      <div class="receipt-content" id="receipt-content">
+        <!-- Content will be dynamically added here -->
+      </div>
+      <div class="receipt-footer">Thank you for using our parking service!</div>
+      <button class="print-button" onclick="window.print()">
+        🖨️ Print Receipt
+      </button>
+    </div>
+
+    <button class="admin-button" onclick="showAdminLogin()">
+      ⚙️ Admin Settings
+    </button>
+
+    <div class="admin-panel" id="adminPanel">
+      <button class="close-receipt" onclick="closeAdminPanel()">×</button>
+      <h3>Admin Settings</h3>
+      <div class="rate-input">
+        <label>Two Wheeler Base Fare (₹):</label>
+        <input type="number" id="twoWheelerBase" min="0" />
+      </div>
+      <div class="rate-input">
+        <label>Two Wheeler Hourly Rate (₹):</label>
+        <input type="number" id="twoWheelerHourly" min="0" />
+      </div>
+      <div class="rate-input">
+        <label>Four Wheeler Base Fare (₹):</label>
+        <input type="number" id="fourWheelerBase" min="0" />
+      </div>
+      <div class="rate-input">
+        <label>Four Wheeler Hourly Rate (₹):</label>
+        <input type="number" id="fourWheelerHourly" min="0" />
+      </div>
+      <div class="rate-input">
+        <label>Total Parking Spots:</label>
+        <input type="number" id="totalSpots" min="1" />
+      </div>
+      <button class="save-settings" onclick="saveSettings()">
+        Save Settings
+      </button>
+    </div>
+
+    <script>
+      let parkingLot = [];
+      let RATES = {
+        twoWheeler: {
+          baseFare: 20,
+          hourlyRate: 10,
+        },
+        fourWheeler: {
+          baseFare: 40,
+          hourlyRate: 20,
+        },
+      };
+      let maxCapacity = 5;
+
+      // Update loadInitialData function
+      async function loadInitialData() {
+        try {
+          // Load settings
+          const settingsResponse = await fetch(
+            "http://localhost:3000/api/settings"
+          );
+          const settings = await settingsResponse.json();
+          RATES = settings.rates;
+          maxCapacity = settings.maxCapacity;
+
+          // Load only active vehicles
+          const vehiclesResponse = await fetch(
+            "http://localhost:3000/api/vehicles"
+          );
+          parkingLot = await vehiclesResponse.json();
+
+          // Update all stat cards and table
+          updateStatus(false);
+          
+          // Update the total spots display
+          document.querySelectorAll(".stat-card").forEach(card => {
+            if (card.querySelector("h3").textContent === "Total Spots") {
+              card.querySelector(".value").textContent = maxCapacity;
+            }
+          });
+        } catch (error) {
+          console.error("Error loading data:", error);
+        }
+      }
+
+      // Modify parkVehicle function
+      async function parkVehicle() {
+        let vehicle = document.getElementById("vehicleNumber").value.trim();
+        let vehicleType = document.getElementById("vehicleType").value;
+        let arrivalTime = new Date().toLocaleTimeString();
+        if (!vehicle) {
+          alert("Enter a valid vehicle number!");
+          return;
+        }
+        if (parkingLot.length >= maxCapacity) {
+          alert("Parking Lot is full!");
+          return;
+        }
+        if (parkingLot.find((entry) => entry.vehicle === vehicle)) {
+          alert("Vehicle is already parked!");
+          return;
+        }
+
+        let spotNumber = getRandomSpot();
+        if (!spotNumber) {
+          alert("No parking spots available!");
+          return;
+        }
+
+        const newVehicle = {
+          vehicle,
+          vehicleType,
+          arrivalTime,
+          departureTime: null,
+          fare: null,
+          spotNumber: spotNumber,
+        };
+
+        try {
+          const response = await fetch("http://localhost:3000/api/vehicles", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(newVehicle),
+          });
+          const savedVehicle = await response.json();
+          parkingLot.push(savedVehicle);
+          document.getElementById("vehicleNumber").value = "";
+          updateStatus(false);
+        } catch (error) {
+          alert("Error parking vehicle");
+          console.error(error);
+        }
+      }
+
+      // Add new function to handle vehicle number input
+      function handleVehicleNumberInput() {
+        const vehicleNumber = document.getElementById("vehicleNumber").value.trim();
+        const removeButton = document.getElementById("removeButton");
+        const entry = parkingLot.find((entry) => entry.vehicle === vehicleNumber);
+        
+        if (entry) {
+          removeButton.style.display = "inline-block";
+          document.getElementById("vehicleType").value = entry.vehicleType;
+        } else {
+          removeButton.style.display = "none";
+        }
+      }
+
+      // Update removeVehicle function to work with input field
+      async function removeVehicle() {
+        const vehicleNumber = document.getElementById("vehicleNumber").value.trim();
+        if (!vehicleNumber) {
+          alert("Please enter a vehicle number!");
+          return;
+        }
+
+        const entry = parkingLot.find((entry) => entry.vehicle === vehicleNumber);
+        if (!entry) {
+          alert("Vehicle not found in parking lot!");
+          return;
+        }
+
+        try {
+          const response = await fetch(
+            `http://localhost:3000/api/vehicles/${entry.id}`,
+            {
+              method: "DELETE",
+            }
+          );
+
+          if (response.ok) {
+            const result = await response.json();
+            
+            if (result.status === 'departure_added') {
+              showReceipt(result.vehicle);
+              
+              // Remove from parkingLot array
+              const index = parkingLot.findIndex((v) => v.id === entry.id);
+              if (index !== -1) {
+                parkingLot.splice(index, 1);
+              }
+
+              // Clear the input field and hide remove button
+              document.getElementById("vehicleNumber").value = "";
+              document.getElementById("removeButton").style.display = "none";
+              
+              // Update the UI immediately
+              updateStatus();
+            }
+          } else {
+            throw new Error("Failed to remove vehicle");
+          }
+        } catch (error) {
+          alert("Error removing vehicle");
+          console.error(error);
+        }
+      }
+
+      // Modify saveSettings function
+      async function saveSettings() {
+        const twoWheelerBase = parseInt(document.getElementById("twoWheelerBase").value);
+        const twoWheelerHourly = parseInt(document.getElementById("twoWheelerHourly").value);
+        const fourWheelerBase = parseInt(document.getElementById("fourWheelerBase").value);
+        const fourWheelerHourly = parseInt(document.getElementById("fourWheelerHourly").value);
+        const newMaxCapacity = parseInt(document.getElementById("totalSpots").value);
+
+        // Validate inputs
+        if (!twoWheelerBase || !twoWheelerHourly || !fourWheelerBase || !fourWheelerHourly || !newMaxCapacity) {
+            alert("All fields are required and must be valid numbers!");
+            return;
+        }
+
+        if (newMaxCapacity < parkingLot.length) {
+            alert("Cannot reduce total spots below current occupancy!");
+            return;
+        }
+
+        const newSettings = {
+            maxCapacity: newMaxCapacity,
+            rates: {
+                twoWheeler: {
+                    baseFare: twoWheelerBase,
+                    hourlyRate: twoWheelerHourly
+                },
+                fourWheeler: {
+                    baseFare: fourWheelerBase,
+                    hourlyRate: fourWheelerHourly
+                }
+            }
+        };
+
+        try {
+            const response = await fetch("http://localhost:3000/api/settings", {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(newSettings)
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || "Failed to save settings");
+            }
+
+            const savedSettings = await response.json();
+            RATES = savedSettings.rates;
+            maxCapacity = savedSettings.maxCapacity;
+
+            updateStatus(false);
+            closeAdminPanel();
+            alert("Settings saved successfully!");
+        } catch (error) {
+            alert("Error saving settings: " + error.message);
+            console.error(error);
+        }
+      }
+
+      // Initialize on page load
+      window.onload = function () {
+        initTheme();
+        loadInitialData();
+      };
+
+      function getRandomSpot() {
+        let availableSpots = Array.from(
+          { length: maxCapacity },
+          (_, i) => i + 1
+        );
+        let occupiedSpots = parkingLot.map((entry) => entry.spotNumber);
+        return availableSpots.find((spot) => !occupiedSpots.includes(spot));
+      }
+
+      // Update updateStatus function to remove individual remove buttons from table
+      function updateStatus(isRemoving = false, searchedVehicle = "") {
+        // Update parking status tab
+        document.getElementById("status").innerHTML = `Occupied: ${
+          parkingLot.length
+        } / ${maxCapacity} | Remaining Spots: ${
+          maxCapacity - parkingLot.length
+        }`;
+
+        // Update all stat cards
+        document.querySelectorAll(".stat-card").forEach((card) => {
+          const title = card.querySelector("h3").textContent;
+          const valueDisplay = card.querySelector(".value");
+
+          switch (title) {
+            case "Total Spots":
+              valueDisplay.textContent = maxCapacity;
+              break;
+            case "Available Spots":
+              valueDisplay.textContent = maxCapacity - parkingLot.length;
+              break;
+            case "Occupied Spots":
+              valueDisplay.textContent = parkingLot.length;
+              break;
+          }
+        });
+
+        // Update table
+        let tableBody = document.getElementById("parkingTable");
+        tableBody.innerHTML = "";
+        parkingLot.forEach((entry) => {
+          let row = `<tr>
+                    <td>${entry.vehicle}</td>
+                    <td>${
+                      entry.vehicleType === "twoWheeler"
+                        ? "Two Wheeler"
+                        : "Four Wheeler"
+                    }</td>
+                    <td>P${entry.spotNumber}</td>
+                    <td>${entry.arrivalTime}</td>
+                    <td>${entry.departureTime || "N/A"}</td>
+                    <td>${entry.fare || "N/A"}</td>
+                </tr>`;
+          tableBody.innerHTML += row;
+        });
+      }
+
+      function showReceipt(entry) {
+        const receipt = document.getElementById("receipt");
+        const overlay = document.getElementById("overlay");
+        const content = document.getElementById("receipt-content");
+        const vehicleRates = RATES[entry.vehicleType];
+
+        content.innerHTML = `
+          <div class="receipt-row">
+            <span>Vehicle Number:</span>
+            <span>${entry.vehicle}</span>
+          </div>
+          <div class="receipt-row">
+            <span>Vehicle Type:</span>
+            <span>${
+              entry.vehicleType === "twoWheeler"
+                ? "Two Wheeler"
+                : "Four Wheeler"
+            }</span>
+          </div>
+          <div class="receipt-row">
+            <span>Spot Number:</span>
+            <span>P${entry.spotNumber}</span>
+          </div>
+          <div class="receipt-row">
+            <span>Entry Time:</span>
+            <span>${entry.arrivalTime}</span>
+          </div>
+          <div class="receipt-row">
+            <span>Exit Time:</span>
+            <span>${entry.departureTime}</span>
+          </div>
+          <div class="receipt-row">
+            <span>Base Fare:</span>
+            <span>₹${vehicleRates.baseFare}</span>
+          </div>
+          <div class="receipt-row">
+            <span>Hourly Rate:</span>
+            <span>₹${vehicleRates.hourlyRate}/hour</span>
+          </div>
+          <div class="receipt-row" style="font-weight: bold; margin-top: 15px; border-top: 1px dashed var(--border-color); padding-top: 10px;">
+            <span>Total Amount:</span>
+            <span>${entry.fare}</span>
+          </div>
+        `;
+
+        receipt.classList.add("show");
+        overlay.classList.add("show");
+      }
+
+      function closeReceipt() {
+        const receipt = document.getElementById("receipt");
+        const overlay = document.getElementById("overlay");
+        receipt.classList.remove("show");
+        overlay.classList.remove("show");
+      }
+
+      function toggleTheme() {
+        const body = document.documentElement;
+        const themeToggle = document.getElementById("themeToggle");
+
+        if (body.getAttribute("data-theme") === "dark") {
+          body.removeAttribute("data-theme");
+          themeToggle.textContent = "🌞";
+          localStorage.setItem("theme", "light");
+        } else {
+          body.setAttribute("data-theme", "dark");
+          themeToggle.textContent = "🌙";
+          localStorage.setItem("theme", "dark");
+        }
+      }
+
+      // Check for saved theme preference
+      function initTheme() {
+        const savedTheme = localStorage.getItem("theme");
+        const body = document.documentElement;
+        const themeToggle = document.getElementById("themeToggle");
+
+        if (savedTheme === "dark") {
+          body.setAttribute("data-theme", "dark");
+          themeToggle.textContent = "🌙";
+        } else {
+          themeToggle.textContent = "🌞";
+        }
+      }
+
+      const ADMIN_PASSWORD = "admin123"; // You can change this
+
+      function showAdminLogin() {
+        const password = prompt("Enter admin password:");
+        if (password === ADMIN_PASSWORD) {
+          showAdminPanel();
+        } else {
+          alert("Incorrect password!");
+        }
+      }
+
+      function showAdminPanel() {
+        const panel = document.getElementById("adminPanel");
+        const overlay = document.getElementById("overlay");
+
+        // Set current values
+        document.getElementById("twoWheelerBase").value =
+          RATES.twoWheeler.baseFare;
+        document.getElementById("twoWheelerHourly").value =
+          RATES.twoWheeler.hourlyRate;
+        document.getElementById("fourWheelerBase").value =
+          RATES.fourWheeler.baseFare;
+        document.getElementById("fourWheelerHourly").value =
+          RATES.fourWheeler.hourlyRate;
+        document.getElementById("totalSpots").value = maxCapacity;
+
+        panel.classList.add("show");
+        overlay.classList.add("show");
+      }
+
+      function closeAdminPanel() {
+        const panel = document.getElementById("adminPanel");
+        const overlay = document.getElementById("overlay");
+        panel.classList.remove("show");
+        overlay.classList.remove("show");
+      }
+    </script>
+  </body>
+</html>
