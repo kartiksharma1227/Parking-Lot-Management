@@ -125,8 +125,10 @@ app.post('/api/vehicles', async (req, res) => {
 
 // Remove vehicle (two-stage process)
 app.delete('/api/vehicles/:id', async (req, res) => {
+    console.log('DELETE route hit for vehicle ID:', req.params.id); // Debug log
     try {
         const [vehicleResult] = await pool.query('SELECT * FROM vehicles WHERE id = ?', [req.params.id]);
+        console.log('Vehicle found:', vehicleResult[0]); // Debug log
         const vehicle = vehicleResult[0];
 
         if (!vehicle) {
@@ -152,8 +154,23 @@ app.delete('/api/vehicles/:id', async (req, res) => {
         const departureTime = new Date().toLocaleTimeString();
         const arrivalTimeStr = vehicle.arrivalTime;
 
-        // Dummy duration logic for now
-        const duration = 1;
+        // Calculate actual duration in hours
+        const arrivalDate = new Date(`2000/01/01 ${arrivalTimeStr}`);
+        const departureDate = new Date(`2000/01/01 ${departureTime}`);
+        
+        if (departureDate < arrivalDate) {
+            departureDate.setDate(departureDate.getDate() + 1);
+        }
+        
+        const durationMs = departureDate - arrivalDate;
+        const durationHours = Math.max(1, Math.ceil(durationMs / (1000 * 60 * 60)));
+
+        console.log('Duration calculation:', {
+            arrivalTime: arrivalTimeStr,
+            departureTime,
+            durationMs,
+            durationHours
+        });
 
         const [settingsResult] = await pool.query('SELECT * FROM settings LIMIT 1');
         const settings = settingsResult[0];
@@ -165,10 +182,21 @@ app.delete('/api/vehicles/:id', async (req, res) => {
             ? Number(settings.twoWheelerHourlyRate)
             : Number(settings.fourWheelerHourlyRate);
 
-        const totalFare = baseFare + (duration * hourlyRate);
+        const additionalHours = Math.max(0, durationHours - 1);
+        const totalFare = baseFare + (additionalHours * hourlyRate);
         const fare = `₹${totalFare}`;
 
-        await pool.query('UPDATE vehicles SET departureTime = ?, fare = ? WHERE id = ?', [departureTime, fare, req.params.id]);
+        console.log('Fare calculation:', {
+            baseFare,
+            hourlyRate,
+            additionalHours,
+            totalFare
+        });
+
+        await pool.query(
+            'UPDATE vehicles SET departureTime = ?, fare = ? WHERE id = ?',
+            [departureTime, fare, req.params.id]
+        );
 
         const [updatedVehicle] = await pool.query('SELECT * FROM vehicles WHERE id = ?', [req.params.id]);
 
