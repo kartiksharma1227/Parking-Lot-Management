@@ -734,7 +734,7 @@
         try {
           // Load settings
           const settingsResponse = await fetch(
-            "http://localhost:3000/api/settings"
+            "https://parking-lot-management-backend.onrender.com/api/settings"
           );
           const settings = await settingsResponse.json();
           RATES = settings.rates;
@@ -742,7 +742,7 @@
 
           // Load only active vehicles
           const vehiclesResponse = await fetch(
-            "http://localhost:3000/api/vehicles"
+            "https://parking-lot-management-backend.onrender.com/api/vehicles"
           );
           parkingLot = await vehiclesResponse.json();
 
@@ -794,7 +794,7 @@
         };
 
         try {
-          const response = await fetch("http://localhost:3000/api/vehicles", {
+          const response = await fetch("https://parking-lot-management-backend.onrender.com/api/vehicles", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -841,7 +841,7 @@
 
         try {
           const response = await fetch(
-            `http://localhost:3000/api/vehicles/${entry.id}`,
+            `https://parking-lot-management-backend.onrender.com/api/vehicles/${entry.id}`,
             {
               method: "DELETE",
             }
@@ -909,7 +909,7 @@
         };
 
         try {
-            const response = await fetch("http://localhost:3000/api/settings", {
+            const response = await fetch("https://parking-lot-management-backend.onrender.com/api/settings", {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json"
